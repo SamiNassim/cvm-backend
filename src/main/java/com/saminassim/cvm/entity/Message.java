@@ -1,10 +1,8 @@
 package com.saminassim.cvm.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,21 +13,19 @@ import org.hibernate.annotations.UuidGenerator;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "profile")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Profile {
+public class Message {
     @Id
     @UuidGenerator
     private String id;
-    @JsonIgnore
-    @OneToOne
-    private User user;
-    private Gender gender;
-    private String country;
+    private String content;
+    @ManyToOne
+    private Conversation conversation;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
 }
