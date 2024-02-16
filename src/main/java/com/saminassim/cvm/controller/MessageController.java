@@ -1,13 +1,12 @@
 package com.saminassim.cvm.controller;
 
+import com.saminassim.cvm.dto.request.MessageRequest;
+import com.saminassim.cvm.exception.MessageCannotBeSentException;
 import com.saminassim.cvm.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -19,5 +18,16 @@ public class MessageController {
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> getOrCreateConversation(@PathVariable String receiverId){
         return ResponseEntity.ok(messageService.getOrCreateConversation(receiverId));
+    }
+
+    @PostMapping("/{conversationId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> sendMessage(@RequestBody MessageRequest messageRequest, @PathVariable String conversationId){
+        try {
+            return ResponseEntity.ok(messageService.sendMessage(messageRequest.getMessageContent(), conversationId));
+        } catch (MessageCannotBeSentException e){
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+
     }
 }

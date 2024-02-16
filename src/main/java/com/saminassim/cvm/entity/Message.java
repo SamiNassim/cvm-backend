@@ -1,5 +1,6 @@
 package com.saminassim.cvm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -22,6 +23,7 @@ public class Message {
     private String id;
     private String content;
     @ManyToOne
+    @JsonIgnore
     private Conversation conversation;
     @CreationTimestamp
     private LocalDateTime createdAt;
