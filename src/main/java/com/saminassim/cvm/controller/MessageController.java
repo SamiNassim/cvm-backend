@@ -1,6 +1,7 @@
 package com.saminassim.cvm.controller;
 
 import com.saminassim.cvm.dto.request.MessageRequest;
+import com.saminassim.cvm.exception.MessageCannotBeDeletedException;
 import com.saminassim.cvm.exception.MessageCannotBeSentException;
 import com.saminassim.cvm.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,16 @@ public class MessageController {
             return ResponseEntity.status(401).body(e.getMessage());
         }
 
+    }
+
+    @DeleteMapping("/{messageId}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> deleteMessage(@PathVariable String messageId){
+        try {
+            messageService.deleteMessage(messageId);
+            return ResponseEntity.ok().build();
+        } catch (MessageCannotBeDeletedException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.saminassim.cvm.service.impl;
 import com.saminassim.cvm.entity.Conversation;
 import com.saminassim.cvm.entity.Message;
 import com.saminassim.cvm.entity.User;
+import com.saminassim.cvm.exception.MessageCannotBeDeletedException;
 import com.saminassim.cvm.exception.MessageCannotBeSentException;
 import com.saminassim.cvm.repository.ConversationRepository;
 import com.saminassim.cvm.repository.MessageRepository;
@@ -74,5 +75,20 @@ public class MessageServiceImpl implements MessageService {
         }
 
         throw new MessageCannotBeSentException("You are not part of this conversation");
+    }
+
+    @Override
+    public void deleteMessage(String messageId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+
+        Message selectedMessage = messageRepository.findById(messageId).orElseThrow();
+
+        if(!selectedMessage.getUser().equals(currentUser)){
+            throw new MessageCannotBeDeletedException("You can't delete this message !");
+        }
+
+        messageRepository.deleteById(messageId);
     }
 }
