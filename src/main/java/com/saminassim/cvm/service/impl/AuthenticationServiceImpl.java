@@ -4,6 +4,7 @@ import com.saminassim.cvm.dto.request.LoginRequest;
 import com.saminassim.cvm.dto.request.RefreshTokenRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
 import com.saminassim.cvm.dto.response.JwtAuthenticationResponse;
+import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
@@ -11,6 +12,7 @@ import com.saminassim.cvm.repository.UserRepository;
 import com.saminassim.cvm.service.AuthenticationService;
 import com.saminassim.cvm.service.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,19 +44,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return userRepository.save(user);
     }
 
-    public JwtAuthenticationResponse login(LoginRequest loginRequest) {
+    public JwtAuthenticationCookieResponse login(LoginRequest loginRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
         var jwt = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
 
-        JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+        ResponseCookie jwtCookie = ResponseCookie.from("CVMJWT", jwt)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60)
+                .domain("localhost")
+                .sameSite("None")
+                .build();
 
-        jwtAuthenticationResponse.setToken(jwt);
-        jwtAuthenticationResponse.setRefreshToken(refreshToken);
+        ResponseCookie refreshCookie = ResponseCookie.from("CVMRefresh", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(604800)
+                .domain("localhost")
+                .sameSite("None")
+                .build();
 
-        return jwtAuthenticationResponse;
+        JwtAuthenticationCookieResponse jwtAuthenticationCookieResponse = new JwtAuthenticationCookieResponse();
+
+        jwtAuthenticationCookieResponse.setTokenCookie(jwtCookie);
+        jwtAuthenticationCookieResponse.setRefreshCookie(refreshCookie);
+
+        return jwtAuthenticationCookieResponse;
 
     }
 

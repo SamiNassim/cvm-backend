@@ -7,15 +7,14 @@ import com.saminassim.cvm.dto.response.JwtAuthenticationResponse;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
 import com.saminassim.cvm.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -32,7 +31,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            return ResponseEntity.ok(authenticationService.login(loginRequest));
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, authenticationService.login(loginRequest).getRefreshCookie().toString(),authenticationService.login(loginRequest).getTokenCookie().toString()).build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(400).body(e.getMessage());
         }
