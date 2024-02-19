@@ -45,7 +45,7 @@ public class ProfileServiceImpl implements ProfileService {
         currentUser.orElseThrow().setProfile(newProfile);
         userRepository.save(currentUser.orElseThrow());
 
-        return newProfile;
+        return profileRepository.save(newProfile);
     }
 
     @Override

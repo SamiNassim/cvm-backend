@@ -56,7 +56,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .secure(true)
                 .path("/")
                 .maxAge(60)
-                .domain("localhost")
                 .sameSite("None")
                 .build();
 
@@ -65,7 +64,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .secure(true)
                 .path("/")
                 .maxAge(604800)
-                .domain("localhost")
                 .sameSite("None")
                 .build();
 

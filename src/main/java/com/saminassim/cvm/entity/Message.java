@@ -26,6 +26,7 @@ public class Message {
     @JsonIgnore
     private Conversation conversation;
     @ManyToOne
+    @JsonIgnore
     private User user;
     @CreationTimestamp
     private LocalDateTime createdAt;

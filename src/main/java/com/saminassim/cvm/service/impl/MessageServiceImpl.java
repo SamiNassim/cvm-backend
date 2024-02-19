@@ -60,6 +60,7 @@ public class MessageServiceImpl implements MessageService {
 
             newMessage.setContent(messageContent);
             newMessage.setConversation(selectedConversation);
+            newMessage.setUser(currentUser);
 
             List<Message> conversationMessages = selectedConversation.getMessages();
             conversationMessages.add(newMessage);
