@@ -1,9 +1,7 @@
 package com.saminassim.cvm.service.impl;
 
 import com.saminassim.cvm.dto.request.LoginRequest;
-import com.saminassim.cvm.dto.request.RefreshTokenRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
-import com.saminassim.cvm.dto.response.JwtAuthenticationResponse;
 import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
@@ -76,20 +74,54 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     }
 
-    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
-        String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
+    public JwtAuthenticationCookieResponse refreshToken(String refreshToken){
+
+        String userEmail = jwtService.extractUserName(refreshToken);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
 
-        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)) {
+        if(jwtService.isTokenValid(refreshToken, user)) {
             var jwt = jwtService.generateToken(user);
 
-            JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+            JwtAuthenticationCookieResponse jwtAuthenticationCookieResponse = new JwtAuthenticationCookieResponse();
 
-            jwtAuthenticationResponse.setToken(jwt);
-            jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+            ResponseCookie jwtCookie = ResponseCookie.from("CVMJWT", jwt)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(60)
+                    .sameSite("None")
+                    .build();
 
-            return jwtAuthenticationResponse;
+            ResponseCookie refreshCookie = ResponseCookie.from("CVMRefresh", refreshToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(604800)
+                    .sameSite("None")
+                    .build();
+
+            jwtAuthenticationCookieResponse.setTokenCookie(jwtCookie);
+            jwtAuthenticationCookieResponse.setRefreshCookie(refreshCookie);
+
+            return jwtAuthenticationCookieResponse;
         }
         return null;
     }
+//// Old method without cookies
+//    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
+//        String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
+//        User user = userRepository.findByEmail(userEmail).orElseThrow();
+//
+//        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)) {
+//            var jwt = jwtService.generateToken(user);
+//
+//            JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
+//
+//            jwtAuthenticationResponse.setToken(jwt);
+//            jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
+//
+//            return jwtAuthenticationResponse;
+//        }
+//        return null;
+//    }
 }
