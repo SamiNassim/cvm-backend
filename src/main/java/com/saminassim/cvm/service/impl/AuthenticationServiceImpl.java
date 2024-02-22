@@ -3,9 +3,12 @@ package com.saminassim.cvm.service.impl;
 import com.saminassim.cvm.dto.request.LoginRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
 import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
+import com.saminassim.cvm.dto.response.UserResponse;
+import com.saminassim.cvm.entity.Profile;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
+import com.saminassim.cvm.repository.ProfileRepository;
 import com.saminassim.cvm.repository.UserRepository;
 import com.saminassim.cvm.service.AuthenticationService;
 import com.saminassim.cvm.service.JWTService;
@@ -26,6 +29,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final ProfileRepository profileRepository;
 
     public User register(RegisterRequest registerRequest) {
 
@@ -106,6 +110,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return jwtAuthenticationCookieResponse;
         }
         return null;
+    }
+
+    @Override
+    public UserResponse getCurrentUser(String token) {
+
+        String userEmail = jwtService.extractUserName(token);
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
+
+        if(jwtService.isTokenValid(token, user)) {
+            UserResponse userResponse = new UserResponse();
+
+            userResponse.setUserId(user.getId());
+            userResponse.setEmail(userEmail);
+            userResponse.setGender(userProfile.getGender());
+            userResponse.setCountry(userProfile.getCountry());
+
+            return userResponse;
+        }
+
+        return null;
+
     }
 //// Old method without cookies
 //    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){

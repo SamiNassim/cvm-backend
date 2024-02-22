@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +79,7 @@ public class MessageServiceImpl implements MessageService {
         throw new MessageCannotBeSentException("You are not part of this conversation");
     }
 
+
     @Override
     public void deleteMessage(String messageId) {
 
@@ -91,5 +93,22 @@ public class MessageServiceImpl implements MessageService {
         }
 
         messageRepository.deleteById(messageId);
+    }
+
+    @Override
+    public List<Conversation> getAllConversations() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+
+        List<Conversation> conversationsStarted = conversationRepository.findConversationsByUserOneId(currentUser.getId());
+        List<Conversation> conversationsReceived = conversationRepository.findConversationsByUserTwoId(currentUser.getId());
+
+        List<Conversation> userConversations = new ArrayList<>();
+        userConversations.addAll(conversationsStarted);
+        userConversations.addAll(conversationsReceived);
+
+        return userConversations;
+
     }
 }

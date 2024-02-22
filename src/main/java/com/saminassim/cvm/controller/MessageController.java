@@ -3,6 +3,7 @@ package com.saminassim.cvm.controller;
 import com.saminassim.cvm.dto.request.MessageRequest;
 import com.saminassim.cvm.exception.MessageCannotBeDeletedException;
 import com.saminassim.cvm.exception.MessageCannotBeSentException;
+import com.saminassim.cvm.exception.UnauthorizedRequestException;
 import com.saminassim.cvm.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,16 @@ public class MessageController {
             return ResponseEntity.ok().build();
         } catch (MessageCannotBeDeletedException e) {
             return ResponseEntity.status(403).body(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> getAllConversations(){
+        try {
+            return ResponseEntity.ok(messageService.getAllConversations());
+        } catch (UnauthorizedRequestException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
     }
 }

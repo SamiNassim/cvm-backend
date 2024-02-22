@@ -3,6 +3,7 @@ package com.saminassim.cvm.controller;
 import com.saminassim.cvm.dto.request.LoginRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
 import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
+import com.saminassim.cvm.dto.response.UserResponse;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
 import com.saminassim.cvm.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,10 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<JwtAuthenticationCookieResponse> refresh(@CookieValue("CVMRefresh") String refreshToken) {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, authenticationService.refreshToken(refreshToken).getRefreshCookie().toString(), authenticationService.refreshToken(refreshToken).getTokenCookie().toString()).build();
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UserResponse> getCurrentUser(@CookieValue("CVMJWT") String token) {
+        return ResponseEntity.ok(authenticationService.getCurrentUser(token));
     }
 }
