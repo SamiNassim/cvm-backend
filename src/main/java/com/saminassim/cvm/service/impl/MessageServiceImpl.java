@@ -1,5 +1,7 @@
 package com.saminassim.cvm.service.impl;
 
+import com.saminassim.cvm.dto.response.ConversationsResponse;
+import com.saminassim.cvm.dto.response.UserResponse;
 import com.saminassim.cvm.entity.Conversation;
 import com.saminassim.cvm.entity.Message;
 import com.saminassim.cvm.entity.User;
@@ -96,7 +98,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Conversation> getAllConversations() {
+    public List<ConversationsResponse> getAllConversations() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
@@ -104,11 +106,39 @@ public class MessageServiceImpl implements MessageService {
         List<Conversation> conversationsStarted = conversationRepository.findConversationsByUserOneId(currentUser.getId());
         List<Conversation> conversationsReceived = conversationRepository.findConversationsByUserTwoId(currentUser.getId());
 
-        List<Conversation> userConversations = new ArrayList<>();
-        userConversations.addAll(conversationsStarted);
-        userConversations.addAll(conversationsReceived);
+        List<ConversationsResponse> conversationsResponse = new ArrayList<>();
 
-        return userConversations;
+        for (Conversation conversation : conversationsStarted){
+            UserResponse otherUser = new UserResponse();
+            otherUser.setCountry(conversation.getUserTwo().getProfile() == null ? "" : conversation.getUserTwo().getProfile().getCountry());
+            otherUser.setEmail(conversation.getUserTwo().getEmail());
+            otherUser.setUserId(conversation.getUserTwo().getId());
+         //   otherUser.setGender(conversation.getUserTwo().getProfile().getGender() == null ? "" : conversation.getUserTwo().getProfile().getGender());
+
+            ConversationsResponse newConv = new ConversationsResponse();
+            newConv.setId(conversation.getId());
+            newConv.setMessages(conversation.getMessages());
+            newConv.setOtherUser(otherUser);
+
+            conversationsResponse.add(newConv);
+        }
+
+        for (Conversation conversation : conversationsReceived){
+            UserResponse otherUser = new UserResponse();
+            otherUser.setCountry(conversation.getUserOne().getProfile() == null ? "" : conversation.getUserOne().getProfile().getCountry());
+            otherUser.setEmail(conversation.getUserOne().getEmail());
+            otherUser.setUserId(conversation.getUserOne().getId());
+           // otherUser.setGender(conversation.getUserOne().getProfile().getGender());
+
+            ConversationsResponse newConv = new ConversationsResponse();
+            newConv.setId(conversation.getId());
+            newConv.setMessages(conversation.getMessages());
+            newConv.setOtherUser(otherUser);
+
+            conversationsResponse.add(newConv);
+        }
+
+        return conversationsResponse;
 
     }
 }
