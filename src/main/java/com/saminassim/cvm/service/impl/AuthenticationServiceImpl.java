@@ -4,7 +4,6 @@ import com.saminassim.cvm.dto.request.LoginRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
 import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
 import com.saminassim.cvm.dto.response.UserResponse;
-import com.saminassim.cvm.entity.Profile;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
@@ -117,21 +116,48 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         String userEmail = jwtService.extractUserName(token);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
-        Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
+        // Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
 
         if(jwtService.isTokenValid(token, user)) {
             UserResponse userResponse = new UserResponse();
 
             userResponse.setUserId(user.getId());
             userResponse.setEmail(userEmail);
-            userResponse.setGender(userProfile.getGender());
-            userResponse.setCountry(userProfile.getCountry());
+           // userResponse.setGender(userProfile.getGender());
+           // userResponse.setCountry(userProfile.getCountry());
 
             return userResponse;
         }
 
         return null;
 
+    }
+
+    @Override
+    public JwtAuthenticationCookieResponse logout() {
+
+        ResponseCookie jwtCookie = ResponseCookie.from("CVMJWT", null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("CVMRefresh", null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        JwtAuthenticationCookieResponse jwtAuthenticationCookieResponse = new JwtAuthenticationCookieResponse();
+
+        jwtAuthenticationCookieResponse.setTokenCookie(jwtCookie);
+        jwtAuthenticationCookieResponse.setRefreshCookie(refreshCookie);
+
+        return jwtAuthenticationCookieResponse;
     }
 //// Old method without cookies
 //    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){

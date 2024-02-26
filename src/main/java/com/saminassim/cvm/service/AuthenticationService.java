@@ -11,4 +11,5 @@ public interface AuthenticationService {
     JwtAuthenticationCookieResponse login(LoginRequest loginRequest);
     JwtAuthenticationCookieResponse refreshToken(String refreshToken);
     UserResponse getCurrentUser(String token);
+    JwtAuthenticationCookieResponse logout();
 }

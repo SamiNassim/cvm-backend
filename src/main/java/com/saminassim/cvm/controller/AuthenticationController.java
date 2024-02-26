@@ -46,4 +46,9 @@ public class AuthenticationController {
     public ResponseEntity<UserResponse> getCurrentUser(@CookieValue("CVMJWT") String token) {
         return ResponseEntity.ok(authenticationService.getCurrentUser(token));
     }
+
+    @GetMapping("/logout")
+    public ResponseEntity<JwtAuthenticationCookieResponse> logout() {
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, authenticationService.logout().getRefreshCookie().toString(), authenticationService.logout().getTokenCookie().toString()).build();
+    }
 }
