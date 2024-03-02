@@ -5,8 +5,6 @@ import com.saminassim.cvm.entity.Profile;
 
 
 public interface ProfileService {
-
-    Profile createProfile(ProfileRequest profileRequest);
-    Profile modifyProfile(ProfileRequest profileRequest);
+    Profile modifyProfile(ProfileRequest profileRequest, String userId);
     Profile getProfile(String userId);
 }

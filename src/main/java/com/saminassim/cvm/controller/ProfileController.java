@@ -14,16 +14,6 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
 
     private final ProfileService profileService;
-    @PostMapping
-    @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<?> createProfile(@RequestBody ProfileRequest profileRequest) {
-        try {
-            return ResponseEntity.ok(profileService.createProfile(profileRequest));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getProfile(@PathVariable String id){
         try {
@@ -35,8 +25,8 @@ public class ProfileController {
 
     @PutMapping
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<?> modifyProfile(@RequestBody ProfileRequest profileRequest) {
-            return ResponseEntity.ok(profileService.modifyProfile(profileRequest));
+    public ResponseEntity<?> modifyProfile(@RequestBody ProfileRequest profileRequest, @CookieValue("CVMJWT") String token) {
+            return ResponseEntity.ok(profileService.modifyProfile(profileRequest, token));
     }
 
 }

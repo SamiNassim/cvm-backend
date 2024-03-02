@@ -4,6 +4,7 @@ import com.saminassim.cvm.dto.request.LoginRequest;
 import com.saminassim.cvm.dto.request.RegisterRequest;
 import com.saminassim.cvm.dto.response.JwtAuthenticationCookieResponse;
 import com.saminassim.cvm.dto.response.UserResponse;
+import com.saminassim.cvm.entity.Profile;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
@@ -37,10 +38,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         User user = new User();
+        Profile userProfile = new Profile();
+
+        profileRepository.save(userProfile);
 
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(Role.USER);
+        user.setProfile(userProfile);
+
+        userProfile.setUser(user);
+
 
         return userRepository.save(user);
     }

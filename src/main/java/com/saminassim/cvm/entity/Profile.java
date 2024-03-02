@@ -28,6 +28,10 @@ public class Profile {
     private User user;
     private Gender gender;
     private String country;
+    private String region;
+    private LocalDateTime dateOfBirth;
+    private Relation relation;
+    private String bio;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

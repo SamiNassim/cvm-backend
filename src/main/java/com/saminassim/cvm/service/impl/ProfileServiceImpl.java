@@ -3,18 +3,16 @@ package com.saminassim.cvm.service.impl;
 import com.saminassim.cvm.dto.request.ProfileRequest;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.entity.Profile;
-import com.saminassim.cvm.exception.ProfileAlreadyExistsException;
 import com.saminassim.cvm.exception.ProfileCannotBeModifiedException;
 import com.saminassim.cvm.exception.ProfileNotFoundException;
 import com.saminassim.cvm.repository.ProfileRepository;
 import com.saminassim.cvm.repository.UserRepository;
+import com.saminassim.cvm.service.JWTService;
 import com.saminassim.cvm.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,51 +20,32 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final JWTService jwtService;
     @Override
-    public Profile createProfile(ProfileRequest profileRequest) {
+    public Profile modifyProfile(ProfileRequest profileRequest, String token) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Optional<User> currentUser = userRepository.findByEmail(authentication.getName());
-        String currentUserId = userRepository.findByEmail(authentication.getName()).orElseThrow().getId();
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        String currentAuthUserName = currentUser.getUsername();
 
-        if(!currentUserId.equals(profileRequest.getUserId())){
-            throw new IllegalArgumentException("You can't create this profile");
-        }
+        String currentTokenUserName = jwtService.extractUserName(token);
 
-        if(currentUser.orElseThrow().getProfile() != null){
-            throw new ProfileAlreadyExistsException("This user profile already exists");
-        }
-
-        Profile newProfile = new Profile();
-
-        newProfile.setGender(profileRequest.getGender());
-        newProfile.setCountry(profileRequest.getCountry());
-        newProfile.setUser(currentUser.orElseThrow());
-        currentUser.orElseThrow().setProfile(newProfile);
-        userRepository.save(currentUser.orElseThrow());
-
-        return profileRepository.save(newProfile);
-    }
-
-    @Override
-    public Profile modifyProfile(ProfileRequest profileRequest) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Optional<User> currentUser = userRepository.findByEmail(authentication.getName());
-        String currentUserId = userRepository.findByEmail(authentication.getName()).orElseThrow().getId();
-
-        if(!currentUserId.equals(profileRequest.getUserId())){
+        if(!currentAuthUserName.equals(currentTokenUserName)){
             throw new ProfileCannotBeModifiedException("You can't modify this profile");
         }
 
-        if(currentUser.orElseThrow().getProfile() == null) {
+        if(currentUser.getProfile() == null) {
             throw new ProfileNotFoundException("This profile doesn't exist");
         }
 
-        Profile currentUserProfile = profileRepository.findProfileByUserId(currentUserId).orElseThrow();
+        Profile currentUserProfile = profileRepository.findProfileByUserId(currentUser.getId()).orElseThrow();
 
-        currentUserProfile.setCountry(profileRequest.getCountry());
         currentUserProfile.setGender(profileRequest.getGender());
+        currentUserProfile.setCountry(profileRequest.getCountry());
+        currentUserProfile.setRegion(profileRequest.getRegion());
+        currentUserProfile.setDateOfBirth(profileRequest.getDateOfBirth());
+        currentUserProfile.setRelation(profileRequest.getRelation());
+        currentUserProfile.setBio(profileRequest.getBio());
 
         return profileRepository.save(currentUserProfile);
     }
