@@ -1,17 +1,16 @@
 package com.saminassim.cvm.dto.request;
 
-import com.saminassim.cvm.entity.Gender;
-import com.saminassim.cvm.entity.Relation;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 
 @Data
 public class ProfileRequest {
-    private Gender gender;
+    private String gender;
     private String country;
     private String region;
-    private LocalDateTime dateOfBirth;
-    private Relation relation;
+    private String dateOfBirth;
+    private String relation;
     private String bio;
+    private MultipartFile image;
 }

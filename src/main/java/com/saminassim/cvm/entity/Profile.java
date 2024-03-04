@@ -32,6 +32,7 @@ public class Profile {
     private LocalDateTime dateOfBirth;
     private Relation relation;
     private String bio;
+    private String imageUrl;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

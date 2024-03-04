@@ -4,6 +4,7 @@ import com.saminassim.cvm.dto.request.ProfileRequest;
 import com.saminassim.cvm.exception.ProfileNotFoundException;
 import com.saminassim.cvm.service.ProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +24,9 @@ public class ProfileController {
         }
     }
 
-    @PutMapping
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('USER')")
-    public ResponseEntity<?> modifyProfile(@RequestBody ProfileRequest profileRequest, @CookieValue("CVMJWT") String token) {
+    public ResponseEntity<?> modifyProfile(@ModelAttribute ProfileRequest profileRequest, @CookieValue("CVMJWT") String token) {
             return ResponseEntity.ok(profileService.modifyProfile(profileRequest, token));
     }
 
