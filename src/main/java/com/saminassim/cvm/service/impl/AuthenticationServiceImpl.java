@@ -124,15 +124,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         String userEmail = jwtService.extractUserName(token);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
-        // Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
+        Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
 
         if(jwtService.isTokenValid(token, user)) {
             UserResponse userResponse = new UserResponse();
 
             userResponse.setUserId(user.getId());
             userResponse.setEmail(userEmail);
-           // userResponse.setGender(userProfile.getGender());
-           // userResponse.setCountry(userProfile.getCountry());
+            if (userProfile.getGender() != null) {
+                userResponse.setGender(userProfile.getGender().getDisplayName());
+            }
+            userResponse.setCountry(userProfile.getCountry() != null ? userProfile.getCountry() : null);
+            userResponse.setRegion(userProfile.getRegion() != null ? userProfile.getRegion() : null);
+            userResponse.setDateOfBirth(userProfile.getDateOfBirth() != null ? String.valueOf(userProfile.getDateOfBirth()) : null);
+            userResponse.setRelation(userProfile.getRelation() != null ? userProfile.getRelation().getDisplayName() : null);
+            userResponse.setBio(userProfile.getBio());
+            userResponse.setImageUrl(userProfile.getImageUrl());
 
             return userResponse;
         }
