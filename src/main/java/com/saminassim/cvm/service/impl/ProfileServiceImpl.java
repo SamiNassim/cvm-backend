@@ -1,6 +1,7 @@
 package com.saminassim.cvm.service.impl;
 
 import com.saminassim.cvm.dto.request.ProfileRequest;
+import com.saminassim.cvm.dto.response.UserResponse;
 import com.saminassim.cvm.entity.Gender;
 import com.saminassim.cvm.entity.Relation;
 import com.saminassim.cvm.entity.User;
@@ -73,7 +74,25 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public Profile getProfile(String userId) {
-        return profileRepository.findProfileByUserId(userId).orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+    public UserResponse getProfile(String userId) {
+
+        Profile selectedProfile = profileRepository.findProfileByUserId(userId).orElseThrow();
+
+        UserResponse userResponse = new UserResponse();
+
+        userResponse.setUserId(selectedProfile.getUser().getId());
+        userResponse.setEmail(selectedProfile.getUser().getEmail());
+        if (selectedProfile.getGender() != null) {
+            userResponse.setGender(selectedProfile.getGender().getDisplayName());
+        }
+        userResponse.setCountry(selectedProfile.getCountry() != null ? selectedProfile.getCountry() : null);
+        userResponse.setRegion(selectedProfile.getRegion() != null ? selectedProfile.getRegion() : null);
+        userResponse.setDateOfBirth(selectedProfile.getDateOfBirth() != null ? String.valueOf(selectedProfile.getDateOfBirth()) : null);
+        userResponse.setRelation(selectedProfile.getRelation() != null ? selectedProfile.getRelation().getDisplayName() : null);
+        userResponse.setBio(selectedProfile.getBio());
+        userResponse.setImageUrl(selectedProfile.getImageUrl());
+
+        return userResponse;
+
     }
 }

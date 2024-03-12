@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/profile")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class ProfileController {
 
     private final ProfileService profileService;
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> getProfile(@PathVariable String id){
         try {
             return ResponseEntity.ok(profileService.getProfile(id));

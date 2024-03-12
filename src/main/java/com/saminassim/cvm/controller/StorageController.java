@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Controller
 @CrossOrigin
 @RequiredArgsConstructor
@@ -29,6 +32,6 @@ public class StorageController {
             return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "inline; filename=\"" + file.getFilename() + "\"").contentType(MediaType.IMAGE_JPEG).body(file);
+                "inline; filename=\"" + URLEncoder.encode(file.getFilename(), StandardCharsets.UTF_8) + "\"").contentType(MediaType.IMAGE_JPEG).body(file);
     }
 }

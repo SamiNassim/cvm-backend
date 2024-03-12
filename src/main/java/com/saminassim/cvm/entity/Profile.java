@@ -1,10 +1,7 @@
 package com.saminassim.cvm.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +28,7 @@ public class Profile {
     private String region;
     private LocalDateTime dateOfBirth;
     private Relation relation;
+    @Column(name = "bio", length = 500)
     private String bio;
     private String imageUrl;
     @CreationTimestamp
