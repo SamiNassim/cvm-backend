@@ -1,6 +1,7 @@
 package com.saminassim.cvm.service.impl;
 
-import com.saminassim.cvm.dto.response.ConversationsResponse;
+import com.saminassim.cvm.dto.response.ConversationResponse;
+import com.saminassim.cvm.dto.response.MessageResponse;
 import com.saminassim.cvm.dto.response.UserResponse;
 import com.saminassim.cvm.entity.Conversation;
 import com.saminassim.cvm.entity.Message;
@@ -98,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<ConversationsResponse> getAllConversations() {
+    public List<ConversationResponse> getAllConversations() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
@@ -106,39 +107,69 @@ public class MessageServiceImpl implements MessageService {
         List<Conversation> conversationsStarted = conversationRepository.findConversationsByUserOneId(currentUser.getId());
         List<Conversation> conversationsReceived = conversationRepository.findConversationsByUserTwoId(currentUser.getId());
 
-        List<ConversationsResponse> conversationsResponse = new ArrayList<>();
+        List<ConversationResponse> conversationResponseList = new ArrayList<>();
+        List<MessageResponse> messageResponseList = new ArrayList<>();
 
         for (Conversation conversation : conversationsStarted){
             UserResponse otherUser = new UserResponse();
-            otherUser.setCountry(conversation.getUserTwo().getProfile() == null ? "" : conversation.getUserTwo().getProfile().getCountry());
-            otherUser.setEmail(conversation.getUserTwo().getEmail());
-            otherUser.setUserId(conversation.getUserTwo().getId());
-         //   otherUser.setGender(conversation.getUserTwo().getProfile().getGender() == null ? "" : conversation.getUserTwo().getProfile().getGender());
+            otherUser.setCountry(conversation.getUserTwo().getProfile().getCountry() != null ? conversation.getUserTwo().getProfile().getCountry() : null);
+            otherUser.setRegion(conversation.getUserTwo().getProfile().getRegion() != null ? conversation.getUserTwo().getProfile().getRegion() : null);
+            otherUser.setDateOfBirth(conversation.getUserTwo().getProfile().getDateOfBirth() != null ? String.valueOf(conversation.getUserTwo().getProfile().getDateOfBirth()) : null);
+            otherUser.setRelation(conversation.getUserTwo().getProfile().getRelation() != null ? conversation.getUserTwo().getProfile().getRelation().getDisplayName() : null);
+            otherUser.setBio(conversation.getUserTwo().getProfile().getBio());
+            otherUser.setImageUrl(conversation.getUserTwo().getProfile().getImageUrl());
 
-            ConversationsResponse newConv = new ConversationsResponse();
+            ConversationResponse newConv = new ConversationResponse();
             newConv.setId(conversation.getId());
-            newConv.setMessages(conversation.getMessages());
+
+            for(Message message : conversation.getMessages()){
+                MessageResponse messageResponse = new MessageResponse();
+                messageResponse.setId(message.getId());
+                messageResponse.setContent(message.getContent());
+                messageResponse.setSenderId(message.getUser().getId());
+                messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
+                messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
+
+                messageResponseList.add(messageResponse);
+            }
+
+            newConv.setMessages(messageResponseList);
             newConv.setOtherUser(otherUser);
 
-            conversationsResponse.add(newConv);
+            conversationResponseList.add(newConv);
         }
 
         for (Conversation conversation : conversationsReceived){
             UserResponse otherUser = new UserResponse();
-            otherUser.setCountry(conversation.getUserOne().getProfile() == null ? "" : conversation.getUserOne().getProfile().getCountry());
-            otherUser.setEmail(conversation.getUserOne().getEmail());
-            otherUser.setUserId(conversation.getUserOne().getId());
-           // otherUser.setGender(conversation.getUserOne().getProfile().getGender());
 
-            ConversationsResponse newConv = new ConversationsResponse();
+            otherUser.setCountry(conversation.getUserOne().getProfile().getCountry() != null ? conversation.getUserOne().getProfile().getCountry() : null);
+            otherUser.setRegion(conversation.getUserOne().getProfile().getRegion() != null ? conversation.getUserOne().getProfile().getRegion() : null);
+            otherUser.setDateOfBirth(conversation.getUserOne().getProfile().getDateOfBirth() != null ? String.valueOf(conversation.getUserOne().getProfile().getDateOfBirth()) : null);
+            otherUser.setRelation(conversation.getUserOne().getProfile().getRelation() != null ? conversation.getUserOne().getProfile().getRelation().getDisplayName() : null);
+            otherUser.setBio(conversation.getUserOne().getProfile().getBio());
+            otherUser.setImageUrl(conversation.getUserOne().getProfile().getImageUrl());
+
+            ConversationResponse newConv = new ConversationResponse();
+
+            for(Message message : conversation.getMessages()){
+                MessageResponse messageResponse = new MessageResponse();
+                messageResponse.setId(message.getId());
+                messageResponse.setContent(message.getContent());
+                messageResponse.setSenderId(message.getUser().getId());
+                messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
+                messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
+
+                messageResponseList.add(messageResponse);
+            }
+
             newConv.setId(conversation.getId());
-            newConv.setMessages(conversation.getMessages());
+            newConv.setMessages(messageResponseList);
             newConv.setOtherUser(otherUser);
 
-            conversationsResponse.add(newConv);
+            conversationResponseList.add(newConv);
         }
 
-        return conversationsResponse;
+        return conversationResponseList;
 
     }
 }

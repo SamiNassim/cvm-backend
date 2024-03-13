@@ -1,13 +1,13 @@
 package com.saminassim.cvm.dto.response;
 
-import com.saminassim.cvm.entity.Message;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class ConversationsResponse {
+public class ConversationResponse {
     private String id;
-    private List<Message> messages;
+    private List<MessageResponse> messages;
+    private UserResponse currentUser;
     private UserResponse otherUser;
 }
