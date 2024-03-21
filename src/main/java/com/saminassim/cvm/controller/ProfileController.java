@@ -32,4 +32,24 @@ public class ProfileController {
             return ResponseEntity.ok(profileService.modifyProfile(profileRequest, token));
     }
 
+    @GetMapping("/search/country")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> searchByCountry(@RequestBody String country){
+        try {
+            return ResponseEntity.ok(profileService.searchByCountry(country));
+        } catch (ProfileNotFoundException e) {
+            return ResponseEntity.status(404).body("Aucun résultat disponible.");
+        }
+    }
+
+    @GetMapping("/search/region")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> searchByRegion(@RequestBody String region){
+        try {
+            return ResponseEntity.ok(profileService.searchByRegion(region));
+        } catch (ProfileNotFoundException e) {
+            return ResponseEntity.status(404).body("Aucun résultat disponible.");
+        }
+    }
+
 }

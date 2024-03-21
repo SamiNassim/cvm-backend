@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -94,5 +96,47 @@ public class ProfileServiceImpl implements ProfileService {
 
         return userResponse;
 
+    }
+
+    @Override
+    public List<UserResponse> searchByCountry(String country) {
+
+        List<Profile> dbResult = profileRepository.findAllByCountry(country);
+
+        return searchBy(dbResult);
+
+    }
+
+    @Override
+    public List<UserResponse> searchByRegion(String region) {
+
+        List<Profile> dbResult = profileRepository.findAllByRegion(region);
+
+        return searchBy(dbResult);
+    }
+
+    private List<UserResponse> searchBy(List<Profile> dbResult) {
+        List<UserResponse> searchResult = new ArrayList<>();
+
+        for(Profile profile : dbResult) {
+            UserResponse userResponse = new UserResponse();
+
+            userResponse.setUserId(profile.getUser().getId());
+            userResponse.setEmail(profile.getUser().getEmail());
+            if (profile.getGender() != null) {
+                userResponse.setGender(profile.getGender().getDisplayName());
+            }
+            userResponse.setCountry(profile.getCountry() != null ? profile.getCountry() : null);
+            userResponse.setRegion(profile.getRegion() != null ? profile.getRegion() : null);
+            userResponse.setDateOfBirth(profile.getDateOfBirth() != null ? String.valueOf(profile.getDateOfBirth()) : null);
+            userResponse.setRelation(profile.getRelation() != null ? profile.getRelation().getDisplayName() : null);
+            userResponse.setBio(profile.getBio());
+            userResponse.setImageUrl(profile.getImageUrl());
+
+            searchResult.add(userResponse);
+
+        }
+
+        return searchResult;
     }
 }
