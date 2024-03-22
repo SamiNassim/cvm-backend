@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -29,25 +29,110 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     @Override
-    public Conversation getOrCreateConversation(String receiverId) {
+    public ConversationResponse getOrCreateConversation(String receiverId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Optional<User> currentUser = userRepository.findByEmail(authentication.getName());
-        String currentUserId = currentUser.orElseThrow().getId();
-        Optional<User> otherUser = userRepository.findById(receiverId);
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+        User otherUser = userRepository.findById(receiverId).orElseThrow();
 
-        Conversation existingConversation = conversationRepository.findConversationByUserOneIdAndUserTwoId(currentUserId, receiverId) != null ? conversationRepository.findConversationByUserOneIdAndUserTwoId(currentUserId, receiverId) : conversationRepository.findConversationByUserOneIdAndUserTwoId(receiverId, currentUserId);
+        Conversation existingConversation = conversationRepository.findConversationByUserOneIdAndUserTwoId(currentUser.getId(), receiverId) != null ? conversationRepository.findConversationByUserOneIdAndUserTwoId(currentUser.getId(), receiverId) : conversationRepository.findConversationByUserOneIdAndUserTwoId(receiverId, currentUser.getId());
 
         if(existingConversation != null) {
-            return existingConversation;
+            ConversationResponse convResponse = new ConversationResponse();
+            UserResponse currentUserResponse = new UserResponse();
+            UserResponse otherUserResponse = new UserResponse();
+            List<MessageResponse> convMessages = new ArrayList<>();
+            User currentUserInConv = Objects.equals(existingConversation.getUserOne().getId(), currentUser.getId()) ? existingConversation.getUserOne() : existingConversation.getUserTwo();
+            User otherUserInConv = Objects.equals(existingConversation.getUserOne().getId(), currentUser.getId()) ? existingConversation.getUserTwo() : existingConversation.getUserOne();
+
+            currentUserResponse.setUserId(currentUserInConv.getId());
+            currentUserResponse.setEmail(currentUserInConv.getEmail());
+            if (existingConversation.getUserTwo().getProfile().getGender() != null) {
+                currentUserResponse.setGender(existingConversation.getUserTwo().getProfile().getGender().getDisplayName());
+            }
+            currentUserResponse.setCountry(currentUserInConv.getProfile().getCountry() != null ? currentUserInConv.getProfile().getCountry() : null);
+            currentUserResponse.setRegion(currentUserInConv.getProfile().getRegion() != null ? currentUserInConv.getProfile().getRegion() : null);
+            currentUserResponse.setDateOfBirth(currentUserInConv.getProfile().getDateOfBirth() != null ? String.valueOf(currentUserInConv.getProfile().getDateOfBirth()) : null);
+            currentUserResponse.setRelation(currentUserInConv.getProfile().getRelation() != null ? currentUserInConv.getProfile().getRelation().getDisplayName() : null);
+            currentUserResponse.setBio(currentUserInConv.getProfile().getBio());
+            currentUserResponse.setImageUrl(currentUserInConv.getProfile().getImageUrl());
+
+            otherUserResponse.setUserId(otherUserInConv.getId());
+            otherUserResponse.setEmail(otherUserInConv.getEmail());
+            if (otherUserInConv.getProfile().getGender() != null) {
+                otherUserResponse.setGender(otherUserInConv.getProfile().getGender().getDisplayName());
+            }
+            otherUserResponse.setCountry(otherUserInConv.getProfile().getCountry() != null ? otherUserInConv.getProfile().getCountry() : null);
+            otherUserResponse.setRegion(otherUserInConv.getProfile().getRegion() != null ? otherUserInConv.getProfile().getRegion() : null);
+            otherUserResponse.setDateOfBirth(otherUserInConv.getProfile().getDateOfBirth() != null ? String.valueOf(otherUserInConv.getProfile().getDateOfBirth()) : null);
+            otherUserResponse.setRelation(otherUserInConv.getProfile().getRelation() != null ? otherUserInConv.getProfile().getRelation().getDisplayName() : null);
+            otherUserResponse.setBio(otherUserInConv.getProfile().getBio());
+            otherUserResponse.setImageUrl(otherUserInConv.getProfile().getImageUrl());
+
+            for(Message message : existingConversation.getMessages()){
+                MessageResponse messageResponse = new MessageResponse();
+                messageResponse.setId(message.getId());
+                messageResponse.setContent(message.getContent());
+                messageResponse.setSenderId(message.getSender().getId());
+                messageResponse.setReceiverId(message.getReceiver().getId());
+                messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
+                messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
+
+                convMessages.add(messageResponse);
+            }
+
+            convResponse.setId(existingConversation.getId());
+            convResponse.setMessages(convMessages);
+            convResponse.setCurrentUser(currentUserResponse);
+            convResponse.setOtherUser(otherUserResponse);
+            convResponse.setCreatedAt(String.valueOf(existingConversation.getCreatedAt()));
+            convResponse.setUpdatedAt(String.valueOf(existingConversation.getUpdatedAt()));
+
+            return convResponse;
         }
 
         Conversation newConversation = new Conversation();
 
-        newConversation.setUserOne(currentUser.orElseThrow());
-        newConversation.setUserTwo(otherUser.orElseThrow());
+        newConversation.setUserOne(currentUser);
+        newConversation.setUserTwo(otherUser);
 
-        return conversationRepository.save(newConversation);
+        conversationRepository.save(newConversation);
+
+        ConversationResponse newConvResponse = new ConversationResponse();
+        UserResponse newCurrentUserResponse = new UserResponse();
+        UserResponse newOtherUserResponse = new UserResponse();
+
+        newCurrentUserResponse.setUserId(currentUser.getId());
+        newCurrentUserResponse.setEmail(currentUser.getEmail());
+        if (currentUser.getProfile().getGender() != null) {
+            newCurrentUserResponse.setGender(currentUser.getProfile().getGender().getDisplayName());
+        }
+        newCurrentUserResponse.setCountry(currentUser.getProfile().getCountry() != null ? currentUser.getProfile().getCountry() : null);
+        newCurrentUserResponse.setRegion(currentUser.getProfile().getRegion() != null ? currentUser.getProfile().getRegion() : null);
+        newCurrentUserResponse.setDateOfBirth(currentUser.getProfile().getDateOfBirth() != null ? String.valueOf(currentUser.getProfile().getDateOfBirth()) : null);
+        newCurrentUserResponse.setRelation(currentUser.getProfile().getRelation() != null ? currentUser.getProfile().getRelation().getDisplayName() : null);
+        newCurrentUserResponse.setBio(currentUser.getProfile().getBio());
+        newCurrentUserResponse.setImageUrl(currentUser.getProfile().getImageUrl());
+
+        newOtherUserResponse.setUserId(otherUser.getId());
+        newOtherUserResponse.setEmail(otherUser.getEmail());
+        if (otherUser.getProfile().getGender() != null) {
+            newOtherUserResponse.setGender(otherUser.getProfile().getGender().getDisplayName());
+        }
+        newOtherUserResponse.setCountry(otherUser.getProfile().getCountry() != null ? otherUser.getProfile().getCountry() : null);
+        newOtherUserResponse.setRegion(otherUser.getProfile().getRegion() != null ? otherUser.getProfile().getRegion() : null);
+        newOtherUserResponse.setDateOfBirth(otherUser.getProfile().getDateOfBirth() != null ? String.valueOf(otherUser.getProfile().getDateOfBirth()) : null);
+        newOtherUserResponse.setRelation(otherUser.getProfile().getRelation() != null ? otherUser.getProfile().getRelation().getDisplayName() : null);
+        newOtherUserResponse.setBio(otherUser.getProfile().getBio());
+        newOtherUserResponse.setImageUrl(otherUser.getProfile().getImageUrl());
+
+        newConvResponse.setId(newConversation.getId());
+        newConvResponse.setCurrentUser(newCurrentUserResponse);
+        newConvResponse.setOtherUser(newOtherUserResponse);
+        newConvResponse.setCreatedAt(String.valueOf(newConversation.getCreatedAt()));
+        newConvResponse.setUpdatedAt(String.valueOf(newConversation.getUpdatedAt()));
+
+        return newConvResponse;
     }
 
     @Override
@@ -64,7 +149,7 @@ public class MessageServiceImpl implements MessageService {
 
             newMessage.setContent(messageContent);
             newMessage.setConversation(selectedConversation);
-            newMessage.setUser(currentUser);
+            newMessage.setSender(currentUser);
 
             List<Message> conversationMessages = selectedConversation.getMessages();
             conversationMessages.add(newMessage);
@@ -91,7 +176,7 @@ public class MessageServiceImpl implements MessageService {
 
         Message selectedMessage = messageRepository.findById(messageId).orElseThrow();
 
-        if(!selectedMessage.getUser().equals(currentUser)){
+        if(!selectedMessage.getSender().equals(currentUser)){
             throw new MessageCannotBeDeletedException("You can't delete this message !");
         }
 
@@ -112,6 +197,9 @@ public class MessageServiceImpl implements MessageService {
 
         for (Conversation conversation : conversationsStarted){
             UserResponse otherUser = new UserResponse();
+            if (conversation.getUserTwo().getProfile().getGender() != null) {
+                otherUser.setGender(conversation.getUserTwo().getProfile().getGender().getDisplayName());
+            }
             otherUser.setCountry(conversation.getUserTwo().getProfile().getCountry() != null ? conversation.getUserTwo().getProfile().getCountry() : null);
             otherUser.setRegion(conversation.getUserTwo().getProfile().getRegion() != null ? conversation.getUserTwo().getProfile().getRegion() : null);
             otherUser.setDateOfBirth(conversation.getUserTwo().getProfile().getDateOfBirth() != null ? String.valueOf(conversation.getUserTwo().getProfile().getDateOfBirth()) : null);
@@ -126,7 +214,7 @@ public class MessageServiceImpl implements MessageService {
                 MessageResponse messageResponse = new MessageResponse();
                 messageResponse.setId(message.getId());
                 messageResponse.setContent(message.getContent());
-                messageResponse.setSenderId(message.getUser().getId());
+                messageResponse.setSenderId(message.getSender().getId());
                 messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
                 messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
 
@@ -141,7 +229,9 @@ public class MessageServiceImpl implements MessageService {
 
         for (Conversation conversation : conversationsReceived){
             UserResponse otherUser = new UserResponse();
-
+            if (conversation.getUserOne().getProfile().getGender() != null) {
+                otherUser.setGender(conversation.getUserOne().getProfile().getGender().getDisplayName());
+            }
             otherUser.setCountry(conversation.getUserOne().getProfile().getCountry() != null ? conversation.getUserOne().getProfile().getCountry() : null);
             otherUser.setRegion(conversation.getUserOne().getProfile().getRegion() != null ? conversation.getUserOne().getProfile().getRegion() : null);
             otherUser.setDateOfBirth(conversation.getUserOne().getProfile().getDateOfBirth() != null ? String.valueOf(conversation.getUserOne().getProfile().getDateOfBirth()) : null);
@@ -155,7 +245,7 @@ public class MessageServiceImpl implements MessageService {
                 MessageResponse messageResponse = new MessageResponse();
                 messageResponse.setId(message.getId());
                 messageResponse.setContent(message.getContent());
-                messageResponse.setSenderId(message.getUser().getId());
+                messageResponse.setSenderId(message.getSender().getId());
                 messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
                 messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
 

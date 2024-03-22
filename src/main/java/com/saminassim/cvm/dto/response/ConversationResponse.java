@@ -10,4 +10,6 @@ public class ConversationResponse {
     private List<MessageResponse> messages;
     private UserResponse currentUser;
     private UserResponse otherUser;
+    private String createdAt;
+    private String updatedAt;
 }
