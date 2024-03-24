@@ -27,7 +27,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> sendMessage(@RequestBody MessageRequest messageRequest, @PathVariable String conversationId){
         try {
-            return ResponseEntity.ok(messageService.sendMessage(messageRequest.getMessageContent(), conversationId));
+            return ResponseEntity.ok(messageService.sendMessage(messageRequest.getContent(), conversationId));
         } catch (MessageCannotBeSentException e){
             return ResponseEntity.status(401).body(e.getMessage());
         }

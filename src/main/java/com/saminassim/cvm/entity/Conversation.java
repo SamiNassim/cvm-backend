@@ -22,10 +22,8 @@ public class Conversation {
     private String id;
     @OneToMany
     private List<Message> messages;
-    @OneToOne
-    private User userOne;
-    @OneToOne
-    private User userTwo;
+    private String userOneId;
+    private String userTwoId;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

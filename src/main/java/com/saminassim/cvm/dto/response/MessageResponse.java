@@ -7,7 +7,6 @@ public class MessageResponse {
     private String id;
     private String content;
     private String senderId;
-    private String receiverId;
     private String createdAt;
     private String updatedAt;
 }
