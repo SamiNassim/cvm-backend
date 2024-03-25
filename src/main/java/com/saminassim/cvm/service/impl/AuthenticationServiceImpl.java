@@ -8,6 +8,7 @@ import com.saminassim.cvm.entity.Profile;
 import com.saminassim.cvm.entity.Role;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.exception.UserAlreadyExistsException;
+import com.saminassim.cvm.exception.UsernameAlreadyExistsException;
 import com.saminassim.cvm.repository.ProfileRepository;
 import com.saminassim.cvm.repository.UserRepository;
 import com.saminassim.cvm.service.AuthenticationService;
@@ -34,7 +35,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public User register(RegisterRequest registerRequest) {
 
         if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("User with this email already exists.");
+            throw new UserAlreadyExistsException("Un compte avec cet e-mail existe déjà.");
+        }
+
+        if(userRepository.findByName(registerRequest.getUsername()).isPresent()){
+            throw new UsernameAlreadyExistsException("Ce nom d'utilisateur est déjà pris.");
         }
 
         User user = new User();
@@ -42,13 +47,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         profileRepository.save(userProfile);
 
+        user.setName(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(Role.USER);
         user.setProfile(userProfile);
 
         userProfile.setUser(user);
-
 
         return userRepository.save(user);
     }
@@ -130,6 +135,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             UserResponse userResponse = new UserResponse();
 
             userResponse.setUserId(user.getId());
+            userResponse.setUsername(user.getName());
             userResponse.setEmail(userEmail);
             if (userProfile.getGender() != null) {
                 userResponse.setGender(userProfile.getGender().getDisplayName());
@@ -174,21 +180,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         return jwtAuthenticationCookieResponse;
     }
-//// Old method without cookies
-//    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
-//        String userEmail = jwtService.extractUserName(refreshTokenRequest.getToken());
-//        User user = userRepository.findByEmail(userEmail).orElseThrow();
-//
-//        if(jwtService.isTokenValid(refreshTokenRequest.getToken(), user)) {
-//            var jwt = jwtService.generateToken(user);
-//
-//            JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
-//
-//            jwtAuthenticationResponse.setToken(jwt);
-//            jwtAuthenticationResponse.setRefreshToken(refreshTokenRequest.getToken());
-//
-//            return jwtAuthenticationResponse;
-//        }
-//        return null;
-//    }
 }

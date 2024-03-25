@@ -83,6 +83,7 @@ public class ProfileServiceImpl implements ProfileService {
         UserResponse userResponse = new UserResponse();
 
         userResponse.setUserId(selectedProfile.getUser().getId());
+        userResponse.setUsername(selectedProfile.getUser().getUsername());
         userResponse.setEmail(selectedProfile.getUser().getEmail());
         if (selectedProfile.getGender() != null) {
             userResponse.setGender(selectedProfile.getGender().getDisplayName());
@@ -122,6 +123,7 @@ public class ProfileServiceImpl implements ProfileService {
             UserResponse userResponse = new UserResponse();
 
             userResponse.setUserId(profile.getUser().getId());
+            userResponse.setUsername(profile.getUser().getUsername());
             userResponse.setEmail(profile.getUser().getEmail());
             if (profile.getGender() != null) {
                 userResponse.setGender(profile.getGender().getDisplayName());

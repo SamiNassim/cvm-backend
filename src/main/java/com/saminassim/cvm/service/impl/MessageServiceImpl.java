@@ -49,6 +49,7 @@ public class MessageServiceImpl implements MessageService {
             User otherUserInConv = Objects.equals(existingConversation.getUserOneId(), currentUser.getId()) ? userTwo : userOne;
 
             currentUserResponse.setUserId(currentUserInConv.getId());
+            currentUserResponse.setUsername(currentUserInConv.getName());
             currentUserResponse.setEmail(currentUserInConv.getEmail());
             if (userTwo.getProfile().getGender() != null) {
                 currentUserResponse.setGender(userTwo.getProfile().getGender().getDisplayName());
@@ -61,6 +62,7 @@ public class MessageServiceImpl implements MessageService {
             currentUserResponse.setImageUrl(currentUserInConv.getProfile().getImageUrl());
 
             otherUserResponse.setUserId(otherUserInConv.getId());
+            otherUserResponse.setUsername(otherUserInConv.getName());
             otherUserResponse.setEmail(otherUserInConv.getEmail());
             if (otherUserInConv.getProfile().getGender() != null) {
                 otherUserResponse.setGender(otherUserInConv.getProfile().getGender().getDisplayName());
@@ -77,6 +79,8 @@ public class MessageServiceImpl implements MessageService {
                 messageResponse.setId(message.getId());
                 messageResponse.setContent(message.getContent());
                 messageResponse.setSenderId(message.getSender().getId());
+                messageResponse.setSenderUsername(message.getSender().getName());
+                messageResponse.setSenderAvatar(message.getSender().getProfile().getImageUrl());
                 messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
                 messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
 
@@ -105,6 +109,7 @@ public class MessageServiceImpl implements MessageService {
         UserResponse newOtherUserResponse = new UserResponse();
 
         newCurrentUserResponse.setUserId(currentUser.getId());
+        newCurrentUserResponse.setUsername(currentUser.getName());
         newCurrentUserResponse.setEmail(currentUser.getEmail());
         if (currentUser.getProfile().getGender() != null) {
             newCurrentUserResponse.setGender(currentUser.getProfile().getGender().getDisplayName());
@@ -117,6 +122,7 @@ public class MessageServiceImpl implements MessageService {
         newCurrentUserResponse.setImageUrl(currentUser.getProfile().getImageUrl());
 
         newOtherUserResponse.setUserId(otherUser.getId());
+        newOtherUserResponse.setUsername(otherUser.getName());
         newOtherUserResponse.setEmail(otherUser.getEmail());
         if (otherUser.getProfile().getGender() != null) {
             newOtherUserResponse.setGender(otherUser.getProfile().getGender().getDisplayName());
@@ -200,6 +206,7 @@ public class MessageServiceImpl implements MessageService {
         for (Conversation conversation : conversationsStarted){
             User userTwo = userRepository.findById(conversation.getUserTwoId()).orElseThrow();
             UserResponse otherUser = new UserResponse();
+            otherUser.setUsername(userTwo.getName());
             if (userTwo.getProfile().getGender() != null) {
                 otherUser.setGender(userTwo.getProfile().getGender().getDisplayName());
             }
@@ -218,6 +225,8 @@ public class MessageServiceImpl implements MessageService {
                 messageResponse.setId(message.getId());
                 messageResponse.setContent(message.getContent());
                 messageResponse.setSenderId(message.getSender().getId());
+                messageResponse.setSenderUsername(message.getSender().getName());
+                messageResponse.setSenderAvatar(message.getSender().getProfile().getImageUrl());
                 messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
                 messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
 
@@ -233,6 +242,7 @@ public class MessageServiceImpl implements MessageService {
         for (Conversation conversation : conversationsReceived){
             User userOne = userRepository.findById(conversation.getUserOneId()).orElseThrow();
             UserResponse otherUser = new UserResponse();
+            otherUser.setUsername(userOne.getName());
             if (userOne.getProfile().getGender() != null) {
                 otherUser.setGender(userOne.getProfile().getGender().getDisplayName());
             }
@@ -250,6 +260,8 @@ public class MessageServiceImpl implements MessageService {
                 messageResponse.setId(message.getId());
                 messageResponse.setContent(message.getContent());
                 messageResponse.setSenderId(message.getSender().getId());
+                messageResponse.setSenderUsername(message.getSender().getName());
+                messageResponse.setSenderAvatar(message.getSender().getProfile().getImageUrl());
                 messageResponse.setCreatedAt(String.valueOf(message.getCreatedAt()));
                 messageResponse.setUpdatedAt(String.valueOf(message.getUpdatedAt()));
 

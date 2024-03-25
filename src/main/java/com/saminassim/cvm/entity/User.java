@@ -24,6 +24,8 @@ public class User implements UserDetails {
     @Id
     @UuidGenerator
     private String id;
+    @Column(unique = true)
+    private String name;
     private String email;
     private String password;
     private Role role;
