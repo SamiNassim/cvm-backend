@@ -12,14 +12,13 @@ import com.saminassim.cvm.repository.ConversationRepository;
 import com.saminassim.cvm.repository.MessageRepository;
 import com.saminassim.cvm.repository.UserRepository;
 import com.saminassim.cvm.service.MessageService;
+import com.saminassim.cvm.utils.MessageResponseSorter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +85,8 @@ public class MessageServiceImpl implements MessageService {
 
                 convMessages.add(messageResponse);
             }
+
+            MessageResponseSorter.sortByCreatedAt(convMessages);
 
             convResponse.setId(existingConversation.getId());
             convResponse.setMessages(convMessages);
@@ -232,6 +233,8 @@ public class MessageServiceImpl implements MessageService {
 
                 messageResponseList.add(messageResponse);
             }
+
+            MessageResponseSorter.sortByCreatedAt(messageResponseList);
 
             newConv.setMessages(messageResponseList);
             newConv.setOtherUser(otherUser);
