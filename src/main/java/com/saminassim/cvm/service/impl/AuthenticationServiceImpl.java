@@ -13,6 +13,7 @@ import com.saminassim.cvm.repository.ProfileRepository;
 import com.saminassim.cvm.repository.UserRepository;
 import com.saminassim.cvm.service.AuthenticationService;
 import com.saminassim.cvm.service.JWTService;
+import com.saminassim.cvm.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
     private final ProfileRepository profileRepository;
+    private final MessageService messageService;
 
     public User register(RegisterRequest registerRequest) {
 
@@ -130,6 +132,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String userEmail = jwtService.extractUserName(token);
         User user = userRepository.findByEmail(userEmail).orElseThrow();
         Profile userProfile = profileRepository.findProfileByUserId(user.getId()).orElseThrow();
+        Integer unreadMessages = messageService.getUnreadMessages();
 
         if(jwtService.isTokenValid(token, user)) {
             UserResponse userResponse = new UserResponse();
@@ -146,6 +149,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             userResponse.setRelation(userProfile.getRelation() != null ? userProfile.getRelation().getDisplayName() : null);
             userResponse.setBio(userProfile.getBio());
             userResponse.setImageUrl(userProfile.getImageUrl());
+            userResponse.setUnreadMessages(unreadMessages);
 
             return userResponse;
         }

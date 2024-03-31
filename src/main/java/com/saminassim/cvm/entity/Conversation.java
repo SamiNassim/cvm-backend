@@ -23,7 +23,9 @@ public class Conversation {
     @OneToMany
     private List<Message> messages;
     private String userOneId;
+    private Integer userOneUnread;
     private String userTwoId;
+    private Integer userTwoUnread;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

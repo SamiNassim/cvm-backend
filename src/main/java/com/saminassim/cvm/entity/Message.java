@@ -1,6 +1,7 @@
 package com.saminassim.cvm.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -22,7 +23,7 @@ public class Message {
     @UuidGenerator
     private String id;
     private String content;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JsonIgnore
     private Conversation conversation;
     @ManyToOne

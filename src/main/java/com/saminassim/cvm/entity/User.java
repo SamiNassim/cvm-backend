@@ -31,7 +31,7 @@ public class User implements UserDetails {
     private Role role;
     @OneToOne(cascade = CascadeType.ALL)
     private Profile profile;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Message> messages;
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -14,4 +14,5 @@ public class UserResponse {
     private String relation;
     private String bio;
     private String imageUrl;
+    private Integer unreadMessages;
 }

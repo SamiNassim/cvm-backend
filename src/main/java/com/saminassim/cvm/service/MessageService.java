@@ -10,4 +10,5 @@ public interface MessageService {
     Message sendMessage(String messageContent, String conversationId);
     void deleteMessage(String messageId);
     List<ConversationResponse> getAllConversations();
+    Integer getUnreadMessages();
 }

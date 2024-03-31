@@ -91,7 +91,9 @@ public class MessageServiceImpl implements MessageService {
             convResponse.setId(existingConversation.getId());
             convResponse.setMessages(convMessages);
             convResponse.setCurrentUser(currentUserResponse);
+            convResponse.setCurrentUserUnread(Objects.equals(existingConversation.getUserOneId(), currentUser.getId()) ? existingConversation.getUserOneUnread() : existingConversation.getUserTwoUnread());
             convResponse.setOtherUser(otherUserResponse);
+            convResponse.setOtherUserUnread(Objects.equals(existingConversation.getUserOneId(), currentUser.getId()) ? existingConversation.getUserTwoUnread() : existingConversation.getUserOneUnread());
             convResponse.setCreatedAt(String.valueOf(existingConversation.getCreatedAt()));
             convResponse.setUpdatedAt(String.valueOf(existingConversation.getUpdatedAt()));
 
@@ -101,7 +103,9 @@ public class MessageServiceImpl implements MessageService {
         Conversation newConversation = new Conversation();
 
         newConversation.setUserOneId(currentUser.getId());
+        newConversation.setUserOneUnread(0);
         newConversation.setUserTwoId(otherUser.getId());
+        newConversation.setUserTwoUnread(0);
 
         conversationRepository.save(newConversation);
 
@@ -137,7 +141,9 @@ public class MessageServiceImpl implements MessageService {
 
         newConvResponse.setId(newConversation.getId());
         newConvResponse.setCurrentUser(newCurrentUserResponse);
+        newConvResponse.setCurrentUserUnread(0);
         newConvResponse.setOtherUser(newOtherUserResponse);
+        newConvResponse.setOtherUserUnread(0);
         newConvResponse.setCreatedAt(String.valueOf(newConversation.getCreatedAt()));
         newConvResponse.setUpdatedAt(String.valueOf(newConversation.getUpdatedAt()));
 
@@ -167,6 +173,17 @@ public class MessageServiceImpl implements MessageService {
             currentUserMessages.add(newMessage);
 
             selectedConversation.setMessages(conversationMessages);
+
+            if(selectedConversation.getUserOneId().equals(currentUser.getId())){
+                selectedConversation.setUserOneUnread(0);
+                selectedConversation.setUserTwoUnread(selectedConversation.getUserTwoUnread()+1);
+            }
+
+            if(selectedConversation.getUserTwoId().equals(currentUser.getId())){
+                selectedConversation.setUserTwoUnread(0);
+                selectedConversation.setUserOneUnread(selectedConversation.getUserOneUnread()+1);
+            }
+
             currentUser.setMessages(currentUserMessages);
 
             return messageRepository.save(newMessage);
@@ -253,7 +270,9 @@ public class MessageServiceImpl implements MessageService {
 
             newConv.setMessages(messageResponseList);
             newConv.setCurrentUser(userOneResponse);
+            newConv.setCurrentUserUnread(conversation.getUserOneUnread());
             newConv.setOtherUser(otherUser);
+            newConv.setOtherUserUnread(conversation.getUserTwoUnread());
             newConv.setCreatedAt(String.valueOf(conversation.getCreatedAt()));
             newConv.setUpdatedAt(String.valueOf(conversation.getUpdatedAt()));
 
@@ -307,7 +326,9 @@ public class MessageServiceImpl implements MessageService {
             newConv.setId(conversation.getId());
             newConv.setMessages(messageResponseList);
             newConv.setCurrentUser(userTwoResponse);
+            newConv.setCurrentUserUnread(conversation.getUserTwoUnread());
             newConv.setOtherUser(otherUser);
+            newConv.setOtherUserUnread(conversation.getUserOneUnread());
             newConv.setCreatedAt(String.valueOf(conversation.getCreatedAt()));
             newConv.setUpdatedAt(String.valueOf(conversation.getUpdatedAt()));
 
@@ -316,5 +337,26 @@ public class MessageServiceImpl implements MessageService {
 
         return conversationResponseList;
 
+    }
+
+    @Override
+    public Integer getUnreadMessages() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+
+        List<Conversation> conversationsStarted = conversationRepository.findConversationsByUserOneId(currentUser.getId());
+        List<Conversation> conversationsReceived = conversationRepository.findConversationsByUserTwoId(currentUser.getId());
+
+        Integer unreadMessages = 0;
+
+        for(Conversation conversation : conversationsStarted){
+            unreadMessages += conversation.getUserOneUnread();
+        }
+
+        for(Conversation conversation : conversationsReceived){
+            unreadMessages += conversation.getUserTwoUnread();
+        }
+
+        return unreadMessages;
     }
 }
