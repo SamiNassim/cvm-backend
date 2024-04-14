@@ -9,6 +9,7 @@ import java.util.List;
 public interface ProfileService {
     Profile modifyProfile(ProfileRequest profileRequest, String userId);
     UserResponse getProfile(String userId);
+    List<UserResponse> getLikedBy();
     List<UserResponse> searchByCountry(String country);
     List<UserResponse> searchByRegion(String region);
 }

@@ -6,6 +6,7 @@ import com.saminassim.cvm.entity.Gender;
 import com.saminassim.cvm.entity.Relation;
 import com.saminassim.cvm.entity.User;
 import com.saminassim.cvm.entity.Profile;
+import com.saminassim.cvm.exception.PremiumFeatureException;
 import com.saminassim.cvm.exception.ProfileCannotBeModifiedException;
 import com.saminassim.cvm.exception.ProfileNotFoundException;
 import com.saminassim.cvm.repository.ProfileRepository;
@@ -23,6 +24,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.saminassim.cvm.entity.Role.PREMIUM;
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +100,42 @@ public class ProfileServiceImpl implements ProfileService {
 
         return userResponse;
 
+    }
+
+    @Override
+    public List<UserResponse> getLikedBy() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userRepository.findByEmail(authentication.getName()).orElseThrow();
+
+        List<User> userLikedBy = currentUser.getLikedBy();
+        List<UserResponse> userLikedByResponse = new ArrayList<>();
+        
+        /* This feature could be a paid feature in the future.
+        
+        if(currentUser.getRole() != PREMIUM){
+            throw new PremiumFeatureException("You are not a premium member.");
+        }
+        
+        */
+
+        for(User user : userLikedBy) {
+            UserResponse newUserResponse = new UserResponse();
+            newUserResponse.setUserId(user.getId());
+            newUserResponse.setUsername(user.getName());
+            if (user.getProfile().getGender() != null) {
+                newUserResponse.setGender(user.getProfile().getGender().getDisplayName());
+            }
+            newUserResponse.setCountry(user.getProfile().getCountry() != null ? user.getProfile().getCountry() : null);
+            newUserResponse.setRegion(user.getProfile().getRegion() != null ? user.getProfile().getRegion() : null);
+            newUserResponse.setDateOfBirth(user.getProfile().getDateOfBirth() != null ? String.valueOf(user.getProfile().getDateOfBirth()) : null);
+            newUserResponse.setRelation(user.getProfile().getRelation() != null ? user.getProfile().getRelation().getDisplayName() : null);
+            newUserResponse.setBio(user.getProfile().getBio());
+            newUserResponse.setImageUrl(user.getProfile().getImageUrl());
+
+            userLikedByResponse.add(newUserResponse);
+        }
+
+        return userLikedByResponse;
     }
 
     @Override

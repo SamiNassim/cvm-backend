@@ -32,6 +32,12 @@ public class ProfileController {
             return ResponseEntity.ok(profileService.modifyProfile(profileRequest, token));
     }
 
+    @GetMapping("/likedby")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<?> getLikedBy(){
+        return ResponseEntity.ok(profileService.getLikedBy());
+    }
+
     @GetMapping("/search/country")
     @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<?> searchByCountry(@RequestBody String country){

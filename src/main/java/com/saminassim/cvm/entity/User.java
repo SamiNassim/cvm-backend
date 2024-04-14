@@ -33,6 +33,8 @@ public class User implements UserDetails {
     private Profile profile;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Message> messages;
+    @OneToMany
+    private List<User> likedBy;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
